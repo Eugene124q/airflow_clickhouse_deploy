@@ -1,0 +1,11 @@
+clickhouse_tmp/
+config/
+evgenij/
+logs/
+plugins/
+ubuntu/
+venv/
+requirements.txt
+.env
+docker-compose.yml
+Dockerfile

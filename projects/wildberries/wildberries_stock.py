@@ -8,7 +8,6 @@ import requests
 import pandas as pd
 from datetime import datetime, timedelta
 from clickhouse_driver import Client
-import clickhouse_connect
 from clickhouse_driver.errors import ServerException
 import os
 from dotenv import load_dotenv, dotenv_values

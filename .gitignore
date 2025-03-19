@@ -7,5 +7,4 @@ ubuntu/
 venv/
 requirements.txt
 .env
-docker-compose.yml
 Dockerfile

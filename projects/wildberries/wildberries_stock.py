@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[30]:
+# In[1]:
 
 
 import requests
@@ -13,13 +13,13 @@ import os
 from dotenv import load_dotenv, dotenv_values
 
 
-# In[27]:
+# In[2]:
 
 
 print(f'начало работы скрипта, {datetime.utcnow() + timedelta(hours = 7)}')
 
 
-# In[13]:
+# In[3]:
 
 
 API_URL_TEMPLATE = "https://card.wb.ru/cards/v2/detail?appType=1&curr=rub&dest=-1257786&spp=99&nm="
@@ -64,31 +64,31 @@ df = pd.DataFrame(stock_data)
 df
 
 
-# In[14]:
+# In[13]:
 
 
 start = datetime.utcnow()
 
 
-# In[15]:
+# In[14]:
 
 
 start
 
 
-# In[16]:
+# In[15]:
 
 
 start + timedelta(hours = 7)
 
 
-# In[17]:
+# In[16]:
 
 
 time = (start + timedelta(hours = 7))
 
 
-# In[18]:
+# In[17]:
 
 
 df['date'] = time
@@ -97,13 +97,13 @@ df['date'] = time
 # In[19]:
 
 
-df1 = df[['date', 'nmld', 'stock']]
+df1 = df.rename(columns={'stock' : 'stocks'})
 
 
 # In[20]:
 
 
-stock = df1.rename(columns={'stock' : 'orders'})
+stock = df1[['date', 'nmld', 'stocks']]
 
 
 # In[21]:
@@ -121,7 +121,7 @@ stock['date'] = pd.to_datetime(stock['date']).dt.date
 # In[23]:
 
 
-stock['orders'] = stock['orders'].astype('int32')
+stock['stocks'] = stock['stocks'].astype('int32')
 
 
 # In[24]:
@@ -130,7 +130,7 @@ stock['orders'] = stock['orders'].astype('int32')
 stock
 
 
-# In[50]:
+# In[25]:
 
 
 print(stock.dtypes)
@@ -138,13 +138,13 @@ print(stock.dtypes)
 
 # # Подключение к БД
 
-# In[31]:
+# In[26]:
 
 
 load_dotenv() 
 
 
-# In[32]:
+# In[27]:
 
 
 host = os.getenv('host')
@@ -154,26 +154,26 @@ user = os.getenv('user')
 password = os.getenv('password')
 
 
-# In[33]:
+# In[28]:
 
 
 client = Client(host=host, port=port, user=user, password=password, database=database, settings={'use_numpy': True,
                                                                                                 'allow_experimental_lightweight_delete': True})
 
 
-# In[34]:
+# In[29]:
 
 
 table = 'stock'
 
 
-# In[35]:
+# In[30]:
 
 
 table_exists = bool(client.execute(f"SELECT name FROM system.tables WHERE name = '{table}'"))
 
 
-# In[36]:
+# In[31]:
 
 
 table_exists
@@ -181,14 +181,14 @@ table_exists
 
 # # Создание таблицы
 
-# In[37]:
+# In[32]:
 
 
 client.execute('''
 CREATE TABLE IF NOT EXISTS default.stock (
     date Date,
     nmld Int64,
-    orders Int32
+    stocks Int32
 ) ENGINE = MergeTree()
 ORDER BY date;
 ''')
@@ -196,7 +196,7 @@ ORDER BY date;
 
 # # Удаление повторяющихся строк
 
-# In[38]:
+# In[33]:
 
 
 client.execute(f"""
@@ -206,13 +206,13 @@ delete from stock where date = '{stock['date'].min().strftime('%Y-%m-%d')}'
 
 # # Залив данных в БД
 
-# In[39]:
+# In[34]:
 
 
 client.insert_dataframe(f'INSERT INTO {database}.{table} VALUES', stock)
 
 
-# In[40]:
+# In[35]:
 
 
 print(f'данные выгружены в БД, {datetime.utcnow() + timedelta(hours = 7)}')
